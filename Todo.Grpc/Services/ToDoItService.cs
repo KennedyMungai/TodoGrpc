@@ -1,4 +1,5 @@
 using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using Todo.Grpc.Data;
 using Todo.Grpc.Models;
 
@@ -38,21 +39,82 @@ public class ToDoItService : ToDoIt.ToDoItBase
 
     public override async Task<ReadToDoResponse> ReadToDo(ReadToDoRequest request, ServerCallContext context)
     {
-        return base.ReadToDo(request, context);
+        var todoItem = await _context.Todos.FindAsync(request.Id);
+
+        if (todoItem == null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
+        }
+
+        return await Task.FromResult(new ReadToDoResponse
+        {
+            Id = todoItem.Id,
+            Title = todoItem.Title,
+            Description = todoItem.Description,
+        });
     }
 
     public override async Task<GetAllResponse> ListToDo(GetAllRequest request, ServerCallContext context)
     {
-        return base.ListToDo(request, context);
+        var response = new GetAllResponse();
+
+        var todoItems = await _context.Todos.ToListAsync();
+
+        foreach (var item in todoItems)
+        {
+            response.ToDo.Add(new ReadToDoResponse
+            {
+                Id = item.Id,
+                Title = item.Title,
+                Description = item.Description,
+                ToDoStatus = item.TodoStatus
+            });
+        }
+
+        return await Task.FromResult(response);
     }
 
     public override async Task<UpdateToDoResponse> UpdateToDo(UpdateToDoRequest request, ServerCallContext context)
     {
-        return base.UpdateToDo(request, context);
+        if (request.Id <= 0 || request.Title is null || request.Description == string.Empty)
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "You must supply a valid object"));
+        }
+
+        var todoToUpdate = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == request.Id);
+
+        if (todoToUpdate is null)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
+        }
+
+        todoToUpdate.Title = request.Title;
+        todoToUpdate.Description = request.Description;
+        todoToUpdate.TodoStatus = request.ToDoStatus;
+
+        await _context.SaveChangesAsync();
+
+        return await Task.FromResult(new UpdateToDoResponse
+        {
+            Id = todoToUpdate.Id
+        });
     }
 
     public override async Task<DeleteToDoResponse> DeleteTodo(DeleteToDoRequest request, ServerCallContext context)
     {
-        return base.DeleteTodo(request, context);
+        var todoToDelete = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == request.Id);
+
+        if (todoToDelete is null || request.Id <= 0)
+        {
+            throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
+        }
+
+        _context.Todos.Remove(todoToDelete);
+        await _context.SaveChangesAsync();
+
+        return await Task.FromResult(new DeleteToDoResponse
+        {
+            Id = todoToDelete.Id
+        });
     }
 }
