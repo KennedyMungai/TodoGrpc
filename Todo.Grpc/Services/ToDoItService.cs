@@ -39,12 +39,7 @@ public class ToDoItService : ToDoIt.ToDoItBase
 
     public override async Task<ReadToDoResponse> ReadToDo(ReadToDoRequest request, ServerCallContext context)
     {
-        var todoItem = await _context.Todos.FindAsync(request.Id);
-
-        if (todoItem == null)
-        {
-            throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
-        }
+        var todoItem = await _context.Todos.FindAsync(request.Id) ?? throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
 
         return await Task.FromResult(new ReadToDoResponse
         {
@@ -81,12 +76,7 @@ public class ToDoItService : ToDoIt.ToDoItBase
             throw new RpcException(new Status(StatusCode.InvalidArgument, "You must supply a valid object"));
         }
 
-        var todoToUpdate = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == request.Id);
-
-        if (todoToUpdate is null)
-        {
-            throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
-        }
+        var todoToUpdate = await _context.Todos.FirstOrDefaultAsync(todo => todo.Id == request.Id) ?? throw new RpcException(new Status(StatusCode.NotFound, $"Todo with id {request.Id} not found"));
 
         todoToUpdate.Title = request.Title;
         todoToUpdate.Description = request.Description;
