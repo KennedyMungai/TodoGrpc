@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Todo.Grpc.Data;
+using Todo.Grpc.Models;
 
 namespace Todo.Grpc.Services;
 
@@ -14,7 +15,25 @@ public class ToDoItService : ToDoIt.ToDoItBase
 
     public override async Task<CreateToDoResponse> CreateTodo(CreateToDoRequest request, ServerCallContext context)
     {
-        return base.CreateTodo(request, context);
+        if (request.Title == string.Empty || request.Description == string.Empty)
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "You must supply a valid object"));
+        }
+
+
+        TodoModel todoItem = new()
+        {
+            Title = request.Title,
+            Description = request.Description,
+        };
+
+        await _context.AddAsync(todoItem);
+        await _context.SaveChangesAsync();
+
+        return await Task.FromResult(new CreateToDoResponse
+        {
+            Id = todoItem.Id,
+        });
     }
 
     public override async Task<ReadToDoResponse> ReadToDo(ReadToDoRequest request, ServerCallContext context)
