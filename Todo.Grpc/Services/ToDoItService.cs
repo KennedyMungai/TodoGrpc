@@ -12,27 +12,27 @@ public class ToDoItService : ToDoIt.ToDoItBase
         _context = context;
     }
 
-    public override Task<CreateToDoResponse> CreateTodo(CreateToDoRequest request, ServerCallContext context)
+    public override async Task<CreateToDoResponse> CreateTodo(CreateToDoRequest request, ServerCallContext context)
     {
         return base.CreateTodo(request, context);
     }
 
-    public override Task<ReadToDoResponse> ReadToDo(ReadToDoRequest request, ServerCallContext context)
+    public override async Task<ReadToDoResponse> ReadToDo(ReadToDoRequest request, ServerCallContext context)
     {
         return base.ReadToDo(request, context);
     }
 
-    public override Task<GetAllResponse> ListToDo(GetAllRequest request, ServerCallContext context)
+    public override async Task<GetAllResponse> ListToDo(GetAllRequest request, ServerCallContext context)
     {
         return base.ListToDo(request, context);
     }
 
-    public override Task<UpdateToDoResponse> UpdateToDo(UpdateToDoRequest request, ServerCallContext context)
+    public override async Task<UpdateToDoResponse> UpdateToDo(UpdateToDoRequest request, ServerCallContext context)
     {
         return base.UpdateToDo(request, context);
     }
 
-    public override Task<DeleteToDoResponse> DeleteTodo(DeleteToDoRequest request, ServerCallContext context)
+    public override async Task<DeleteToDoResponse> DeleteTodo(DeleteToDoRequest request, ServerCallContext context)
     {
         return base.DeleteTodo(request, context);
     }
