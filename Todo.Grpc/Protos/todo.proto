@@ -10,7 +10,7 @@ service ToDoIt {
     // Read Single
     rpc ReadToDo (ReadToDoRequest) returns (ReadToDoResponse);
     // Read All
-    rpc ListToDo {GetAllRequest} returns (GetAllResponse);
+    rpc ListToDo (GetAllRequest) returns (GetAllResponse);
     // Update
     rpc UpdateToDo (UpdateToDoRequest) returns (UpdateToDoResponse);
     // Delete
